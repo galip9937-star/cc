@@ -3,16 +3,13 @@
 $min = 1;
 $max = 98;
 
-// Telegram bilgisi
 $telegram = "@unutur";
-$yapan = " ⛧ 𝐋𝐨𝐫𝐞𝐱 ⛧ ";
+$yapan = "⛧ 𝐋𝐨𝐫𝐞𝐱 ⛧";
 
-// ID var mı kontrol et
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $id = (int)$_GET['id'];
     if ($id >= $min && $id <= $max) {
         $dosya = str_pad($id, 2, "0", STR_PAD_LEFT) . ".jpg";
-        // Ana depoda olduğu için klasör yok, direkt dosya
         $yol = $dosya;
         
         if (file_exists($yol)) {
@@ -31,20 +28,21 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     }
 }
 
-// ID yoksa random JSON döndür
 $random = mt_rand($min, $max);
 $dosya = str_pad($random, 2, "0", STR_PAD_LEFT) . ".jpg";
 
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
-$baseUrl = $protocol . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$host = $_SERVER['HTTP_HOST'];
+$baseUrl = $protocol . $host . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 $imageUrl = $baseUrl . "/kimlik.php?id=" . $random;
 
-header('Content-Type: application/json');
+// JSON'u düzgün formatla (UTF-8, eğik çizgileri kaçırma)
+header('Content-Type: application/json; charset=utf-8');
 echo json_encode([
     "id" => $random,
     "file" => $dosya,
     "url" => $imageUrl,
     "developer" => $yapan,
     "telegram" => $telegram
-], JSON_PRETTY_PRINT);
+], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 ?>
